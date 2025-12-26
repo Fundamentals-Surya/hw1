@@ -1,0 +1,137 @@
+---
+title: An R Markdown document converted from "hw1.ipynb"
+output: html_document
+---
+
+```{r}
+# Clears all objects from the environment, effectively starting fresh
+rm(list=ls())
+```
+
+```{r}
+# Link for the fragile state index Excel file from the Github repository
+git_link = "https://github.com/Fundamentals-Surya/hw1/raw/refs/heads/main/FSI-2023-DOWNLOAD.xlsx"
+```
+
+```{r}
+# Installs and loads the rio package, then imports the excel file from the
+# previous git_link object as a data.frame object
+
+#install.packages('rio')
+library(rio)
+f23 = import(file = git_link)
+```
+
+```{r}
+# Lists the column names of the table
+names(x = f23)
+```
+
+```{r}
+# Shows each column data type
+str(object = f23)
+```
+
+```{r}
+# Displays the first ten rows of the table
+head(x = f23,10)
+```
+
+```{r}
+# Displays the last ten rows of the table
+tail(f23,10)
+```
+
+```{r}
+# Pattern matches and extracts column names containing any of the text
+# defined in the pattern object
+grep(pattern = "Country|S1|P1|E2|Total", x = names(f23),fixed = F,value = T)
+```
+
+```{r}
+# Saves the extracted column names from the grep function and
+# creates a subset of the table with the selected column names
+keep=grep("Country|S1|P1|E2|Total",names(f23),fixed = F,value = T)
+f23_subset=f23[,keep]
+```
+
+```{r}
+# Renames the last 3 columns
+names(f23_subset)[3:5]=c("S1","E2", "P1")
+```
+
+```{r}
+# Option 1 shows the table view for the ten best (lowest scoring) countries based on the E2 column
+tail(f23_subset[order(x=-f23_subset$E2),],10)
+# Option 2 shows the names for the ten best (lowest scoring) countries based on the E2 column
+tail(f23_subset[order(x=-f23_subset$E2),'Country'],10)
+```
+
+```{r}
+# Provides a statistical overview of the subset table
+summary(object = f23_subset)
+```
+
+```{r}
+# Extracts the third (worst) quartile
+q3_Total=quantile(x = f23_subset$Total,
+                  probs = 0.75,
+                  na.rm = TRUE)
+```
+
+```{r}
+# Creates a correlation matrix that shows how strongly related
+# S1, E2, and P1 are to each other
+cor(x=f23_subset[,-c(1,2)])
+```
+
+```{r}
+# Installs and loads the corrtable package and creates a correlation matrix
+# like the previous cell, but adds asterisks if the relationship is
+# statistically significant
+
+#install.packages("corrtable")
+library(corrtable)
+corrtable::correlation_matrix(df = f23_subset[,-c(1,2)])
+```
+
+```{r}
+# Creates a linear regression model for S1 based on P1 and E2
+# and displays the statistical overview of the model
+lm(S1~P1+E2,data=f23_subset)
+model <- lm(S1 ~ P1 + E2, data = f23_subset)
+summary(model)
+```
+
+```{r}
+# Displays a histogram of the P1 column
+hist(x = f23_subset$P1)
+```
+
+```{r}
+# Displays a scatterplot of all (S1, E2) pairs
+plot(x=f23_subset$S1, y=f23_subset$E2)
+```
+
+```{r}
+# Checks which countries are in the third (worst) quartile
+f23_subset$Total>=q3_Total
+f23_subset$worstQt=f23_subset$Total>=q3_Total
+```
+
+```{r}
+# Plots colored points (S1, E2) based on whether or not the country is in the
+# worst quartile
+plot(f23_subset$S1,
+     f23_subset$E2,pch=20,
+     col = as.factor(f23_subset$worstQt))
+```
+
+```{r}
+# Plots the regression of P1 and E2 and their influence on S1
+
+#install.packages("sjPlot")
+library(sjPlot)
+plot_models(model)
+```
+
