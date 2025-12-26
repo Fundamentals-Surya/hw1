@@ -95,7 +95,7 @@ library(corrtable)
 corrtable::correlation_matrix(df = f23_subset[,-c(1,2)])
 ```
 
-```{r}
+```{r, results='hide'}
 # Creates a linear regression model for S1 based on P1 and E2
 # and displays the statistical overview of the model
 lm(S1~P1+E2,data=f23_subset)
@@ -113,7 +113,7 @@ hist(x = f23_subset$P1)
 plot(x=f23_subset$S1, y=f23_subset$E2)
 ```
 
-```{r}
+```{r, results='hide'}
 # Checks which countries are in the third (worst) quartile
 f23_subset$Total>=q3_Total
 f23_subset$worstQt=f23_subset$Total>=q3_Total
